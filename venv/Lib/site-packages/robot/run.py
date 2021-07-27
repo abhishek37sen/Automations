@@ -49,10 +49,10 @@ USAGE = """Robot Framework -- A generic automation framework
 
 Version:  <VERSION>
 
-Usage:  robot [options] data_sources
-   or:  python -m robot [options] data_sources
-   or:  python path/to/robot [options] data_sources
-   or:  java -jar robotframework.jar [options] data_sources
+Usage:  robot [options] paths
+   or:  python -m robot [options] paths
+   or:  python path/to/robot [options] paths
+   or:  java -jar robotframework.jar [options] paths
 
 Robot Framework is a generic open source automation framework for acceptance
 testing, acceptance test-driven development (ATDD) and robotic process
@@ -63,7 +63,7 @@ keywords can also be created using Robot Framework's own syntax.
 
 The easiest way to execute Robot Framework is using the `robot` command created
 as part of the normal installation. Alternatively it is possible to execute
-the `robot` module directly using `python -m robot`, where `python` can be
+the `robot` module directly like `python -m robot`, where `python` can be
 replaced with any supported Python interpreter such as `jython`, `ipy` or
 `python3`. Yet another alternative is running the `robot` directory like
 `python path/to/robot`. Finally, there is a standalone JAR distribution
@@ -97,8 +97,8 @@ Options
                           files or when using resource files. If more than one
                           extension is needed, separate them with a colon.
                           Examples: `--extension txt`, `--extension robot:txt`
-                          New in RF 3.0.1. Starting from RF 3.2 only `*.robot`
-                          files are parsed by default.
+                          Starting from RF 3.2 only `*.robot` files are parsed
+                          by default.
  -N --name name           Set the name of the top level suite. By default the
                           name is created based on the executed file or
                           directory.
@@ -138,17 +138,16 @@ Options
                           re-executed. Equivalent to selecting same tests
                           individually using --test.
  -S --rerunfailedsuites output  Select failed suites from an earlier output
-                          file to be re-executed. New in RF 3.0.1.
+                          file to be re-executed.
     --runemptysuite       Executes suite even if it contains no tests. Useful
                           e.g. with --include/--exclude when it is not an error
                           that no test matches the condition.
- -c --critical tag *      Tests having the given tag are considered critical.
-                          If no critical tags are set, all tests are critical.
-                          Tags can be given as a pattern same way as with
-                          --include.
- -n --noncritical tag *   Tests having the given tag are not critical even if
-                          they have a tag set with --critical. Tag can be
-                          a pattern.
+    --skip tag *          Tests having given tag will be skipped. Tag can be
+                          a pattern. New in RF 4.0.
+    --skiponfailure tag *  Tests having given tag will be skipped if they fail.
+                          Tag can be a pattern. New in RF 4.0.
+ -n --noncritical tag *   Alias for --skiponfailure. Deprecated since RF 4.0.
+ -c --critical tag *      Opposite of --noncritical. Deprecated since RF 4.0.
  -v --variable name:value *  Set variables in the test data. Only scalar
                           variables with string value are supported and name is
                           given without `${}`. See --variablefile for a more
@@ -180,7 +179,7 @@ Options
                           similarly as --log. Default: report.html
  -x --xunit file          xUnit compatible result file. Not created unless this
                           option is specified.
-    --xunitskipnoncritical  Mark non-critical tests in xUnit output as skipped.
+    --xunitskipnoncritical  Deprecated since RF 4.0 and has no effect anymore.
  -b --debugfile file      Debug file written during execution. Not created
                           unless this option is specified.
  -T --timestampoutputs    When this option is used, timestamp in a format
@@ -196,9 +195,9 @@ Options
     --reporttitle title   Title for the generated report file. The default
                           title is `<SuiteName> Test Report`.
     --reportbackground colors  Background colors to use in the report file.
-                          Either `all_passed:critical_passed:failed` or
-                          `passed:failed`. Both color names and codes work.
-                          Examples: --reportbackground green:yellow:red
+                          Order is `passed:failed:skipped`. Both color names
+                          and codes work. `skipped` can be omitted.
+                          Examples: --reportbackground green:red:yellow
                                     --reportbackground #00E:#E00
     --maxerrorlines lines  Maximum number of error message lines to show in
                           report when tests fail. Default is 40, minimum is 10
@@ -295,7 +294,6 @@ Options
     --dryrun              Verifies test data and runs tests so that library
                           keywords are not executed.
  -X --exitonfailure       Stops test execution if any critical test fails.
-                          Short option -X is new in RF 3.0.1.
     --exitonerror         Stops test execution if any error occurs when parsing
                           test data, importing libraries, and so on.
     --skipteardownonexit  Causes teardowns to be skipped if test execution is
@@ -410,7 +408,7 @@ $ jython /opt/robot tests.robot
 $ robot --SuiteStatLevel 2 --Metadata Version:3 tests/*.robot more/tests.robot
 
 # Setting default options and syslog file before running tests.
-$ export ROBOT_OPTIONS="--critical regression --suitestatlevel 2"
+$ export ROBOT_OPTIONS="--outputdir results --suitestatlevel 2"
 $ export ROBOT_SYSLOG_FILE=/tmp/syslog.txt
 $ robot tests.robot
 """
@@ -425,6 +423,12 @@ class RobotFramework(Application):
     def main(self, datasources, **options):
         settings = RobotSettings(options)
         LOGGER.register_console_logger(**settings.console_output_config)
+        if settings['Critical'] or settings['NonCritical']:
+            LOGGER.warn("Command line options --critical and --noncritical have been "
+                        "deprecated. Use --skiponfailure instead.")
+        if settings['XUnitSkipNonCritical']:
+            LOGGER.warn("Command line option --xunitskipnoncritical has been "
+                        "deprecated and has no effect.")
         LOGGER.info('Settings:\n%s' % unic(settings))
         builder = TestSuiteBuilder(settings['SuiteNames'],
                                    included_extensions=settings.extension,
@@ -465,7 +469,7 @@ def run_cli(arguments=None, exit=True):
     :param arguments: Command line options and arguments as a list of strings.
         Starting from RF 3.1, defaults to ``sys.argv[1:]`` if not given.
     :param exit: If ``True``, call ``sys.exit`` with the return code denoting
-        execution status, otherwise just return the rc. New in RF 3.0.1.
+        execution status, otherwise just return the rc.
 
     Entry point used when running tests from the command line, but can also
     be used by custom scripts that execute tests. Especially useful if the

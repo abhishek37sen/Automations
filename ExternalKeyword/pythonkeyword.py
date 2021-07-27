@@ -7,3 +7,11 @@ def create_folder(foldername):
         return "Folder Not Created"
     else:
         return "Folder Created"
+
+
+def create_url(env):
+    if env=='dev':
+        dict= {
+            'url':  'https://rahulshettyacademy.com/AutomationPractice/'
+        }
+        return dict

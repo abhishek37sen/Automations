@@ -23,6 +23,7 @@ except ImportError:
     lxml_etree = None
 
 from robot.api import logger
+from robot.api.deco import keyword
 from robot.libraries.BuiltIn import BuiltIn
 from robot.utils import (asserts, ET, ETSource, is_bytes, is_falsy, is_string,
                          is_truthy, plural_or_not as s, PY2)
@@ -423,8 +424,7 @@ class XML(object):
     | `Parse XML` | ${XML} | keep_clark_notation=${EMPTY} | # Empty string is false.       |
     | `Parse XML` | ${XML} | keep_clark_notation=${FALSE} | # Python ``False`` is false.   |
 
-    Considering string ``NONE`` false is new in Robot Framework 3.0.3 and
-    considering also ``OFF`` and ``0`` false is new in Robot Framework 3.1.
+    Considering ``OFF`` and ``0`` false is new in Robot Framework 3.1.
 
     == Pattern matching ==
 
@@ -496,8 +496,7 @@ class XML(object):
 
         If you want to strip namespace information altogether so that it is
         not included even if XML is saved, you can give a true value to
-        ``strip_namespaces`` argument. This functionality is new in Robot
-        Framework 3.0.2.
+        ``strip_namespaces`` argument.
 
         Examples:
         | ${root} = | Parse XML | <root><child/></root> |
@@ -759,6 +758,7 @@ class XML(object):
         text = self.get_element_text(source, xpath, normalize_whitespace)
         should_match(text, pattern, message, values=False)
 
+    @keyword(types=None)
     def get_element_attribute(self, source, name, xpath='.', default=None):
         """Returns the named attribute of the specified element.
 
@@ -968,6 +968,7 @@ class XML(object):
         for elem in self.get_elements(source, xpath):
             self.set_element_tag(elem, tag)
 
+    @keyword(types=None)
     def set_element_text(self, source, text=None, tail=None, xpath='.'):
         """Sets text and/or tail text of the specified element.
 
@@ -999,6 +1000,7 @@ class XML(object):
             element.tail = tail
         return source
 
+    @keyword(types=None)
     def set_elements_text(self, source, text=None, tail=None, xpath='.'):
         """Sets text and/or tail text of the specified elements.
 

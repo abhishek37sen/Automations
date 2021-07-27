@@ -16,6 +16,7 @@
 from __future__ import division
 
 from operator import add, sub
+import re
 
 from .platform import PY2
 from .robottypes import is_integer
@@ -124,3 +125,14 @@ def seq2str2(sequence):
     if not sequence:
         return '[ ]'
     return '[ %s ]' % ' | '.join(unic(item) for item in sequence)
+
+
+def test_or_task(text, rpa=False):
+    """Replaces `{test}` in `text` with `test` or `task` depending on `rpa`."""
+    def replace(match):
+        test = match.group(1)
+        if not rpa:
+            return test
+        upper = [c.isupper() for c in test]
+        return ''.join(c.upper() if up else c for c, up in zip('task', upper))
+    return re.sub('{(test)}', replace, text, flags=re.IGNORECASE)

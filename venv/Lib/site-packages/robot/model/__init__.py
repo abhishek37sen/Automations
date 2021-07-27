@@ -25,14 +25,15 @@ elsewhere.
 This package is considered stable.
 """
 
+from .body import Body, BodyItem, IfBranches
 from .configurer import SuiteConfigurer
+from .control import For, If, IfBranch
 from .testsuite import TestSuite
 from .testcase import TestCase
 from .keyword import Keyword, Keywords
-from .message import Message
+from .message import Message, Messages
 from .modifier import ModelModifier
 from .tags import Tags, TagPattern, TagPatterns
-from .criticality import Criticality
 from .namepatterns import SuiteNamePatterns, TestNamePatterns
 from .visitor import SuiteVisitor
 from .totalstatistics import TotalStatisticsBuilder

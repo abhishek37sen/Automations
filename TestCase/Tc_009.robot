@@ -1,5 +1,6 @@
 *** Settings ***
 Library    SeleniumLibrary
+Library    ../Library/Clipboard.py
 Resource    ../Resources/Resources1.robot
 *** Variables ***
 ${url}    https://www.thetestingworld.com/index.php?option=com_users&view=login&Itemid=587
@@ -22,3 +23,4 @@ Test Case For Reading From Excel
         click button    //button[@type='submit']
     END
 #    log to console    ${cl}
+    copy to clipboard
