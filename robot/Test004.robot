@@ -6,6 +6,7 @@ Library    Collections
 Test Teardown    Close All Browsers
 Library           Selenium2Library
 #Suite Setup       Open Website
+Test Teardown    close browser
 *** Variables ***
 ${URL}    https://robotframework.org/
 ${CHROMEDRIVER_PATH}        /usr/local/bin/chromedriver
@@ -49,7 +50,8 @@ Test_case Validation_all
     Call Method    ${chrome_options}    add_argument    --no-sandbox
     Call Method    ${chrome_options}    add_argument    --headless
     Open Browser    ${URl}    chrome    options=${chrome_options}      executable_path=${CHROMEDRIVER_PATH}
-    log to console    done
+    log to console    non
+
 
 #    select from list by value    name:sex    2
 #    select from list by index    name:sex    1
